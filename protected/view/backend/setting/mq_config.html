@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<{include file='backend/lib/meta.html'}>
+<link rel="stylesheet" type="text/css" href="public/theme/backend/css/verydows.css" />
+<link rel="stylesheet" type="text/css" href="public/theme/backend/css/main.css" />
+<script type="text/javascript" src="public/script/jquery.js"></script>
+<script type="text/javascript" src="public/theme/backend/js/verydows.js"></script>
+<script type="text/javascript">
+
+$(function(){
+    $('#shipping-goods-list').html($('#goods-list').html());
+    $('#shipping-consignee').html($('#order-consignee').html());
+});
+function submitConfForm(){
+    var form = $('#pop-shipping form');
+    // form.find('select[name="carrier_id"]').vdsFieldChecker({rules: {required:[true, '清选择物流承运商']}});
+    // form.find('input[name="tracking_no"]').vdsFieldChecker({rules: {required:[true, '运单号不能为空']}});
+    // form.find('textarea[name="memos"]').vdsFieldChecker({rules: {maxlen:[240, '备注不能超过240个字符']}, tipsPos: 'br'});
+    // form.find('input[name="iam_endpoint"]').vdsFieldChecker({rules: {required:[true, '运单号不能为空']}});
+    form.vdsFormChecker();
+}
+
+</script>
+</head>
+<body>
+
+<div class="poper cut" id="pop-shipping"> <a class="close" onclick="closeOperate('pop-shipping')"></a>
+  <h3 class="th f14 ta-c">修改mq配置</h3>
+  <div class="pad10 cut">
+    <form method="post" action="<{url m=$MOD c='mq_config' a='operate'}>">
+      <div class="module"><table class="datalist" id="shipping-goods-list"></table></div>
+      <div class="module mt10">
+        <table class="dataform">
+          <tr>
+            <th>ak</th>
+            <td><input name="ak" type="text" class="w200 txt" value="" style="width:400px;" /></td>
+          </tr>
+          <tr>
+            <th>sk</th>
+            <td><input name="sk" type="text" class="w200 txt" value="" style="width:400px;" /></td>
+          </tr>
+          <tr>
+            <th>project_id</th>
+            <td><input name="project_id" type="text" class="w200 txt" value="" style="width:400px;" /></td>
+          </tr>
+          <tr>
+            <th>queue_id</th>
+            <td><input name="queue_id" type="text" class="w200 txt" value="" style="width:400px;" /></td>
+          </tr>
+          <tr>
+            <th>group_id</th>
+            <td><input name="group_id" type="text" class="w200 txt" value="" style="width:400px;" /></td>
+          </tr>
+          <tr>
+            <th>username</th>
+            <td><input name="username" type="text" class="w200 txt" value="" style="width:400px;" /></td>
+          </tr>
+          <tr>
+            <th>password</th>
+            <td><input name="password" type="password" class="w200 txt" value="" style="width:400px;" /></td>
+          </tr>
+
+        </table>
+      </div>
+      <div class="ta-c mt5 pad10">
+        <button type="button" class="ubtn btn" onclick="submitConfForm()">确定并提交</button>
+        <span class="sep40"></span>
+        <button type="reset" class="fbtn btn">重置表单</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

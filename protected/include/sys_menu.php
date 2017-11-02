@@ -75,6 +75,7 @@ return array
             '配送方式' => 'c=shipping_method&a=index',
             '支付方式' => 'c=payment_method&a=index',
             '物流承运商' => 'c=shipping_carrier&a=index',
+            '消息队列配置' => 'c=mq_config&a=index',
         ),
         
         '系统应用' => array
@@ -87,6 +88,7 @@ return array
             '文件管理' => 'c=file&a=index',
             '数据库' => 'c=database&a=backup',
             '系统清理' => 'c=cleaner&a=index',
+            '故障模拟' => 'c=simulate&a=index',
         ),
     )
 );

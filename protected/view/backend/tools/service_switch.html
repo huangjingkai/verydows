@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<{include file='backend/lib/meta.html'}>
+<link rel="stylesheet" type="text/css" href="public/theme/backend/css/verydows.css" />
+<link rel="stylesheet" type="text/css" href="public/theme/backend/css/main.css" />
+<script type="text/javascript" src="public/script/jquery.js"></script>
+<script type="text/javascript" src="public/theme/backend/js/verydows.js"></script>
+<script type="text/javascript">
+
+function startSimulate(){
+    $.ajax({
+        type: 'post',
+        dataType: 'json',
+        url: "<{url m=$MOD c='simulate' a='start'}>",
+        //data: {clean:clean},
+        beforeSend: function(){$.vdsMasker(true);$('#waiting').vdsMidst({gotop: -200}).show();},
+        success: function(res){
+            $.vdsMasker(false);
+            $('#waiting').hide();
+            if(res.status == 'success'){
+                $('body').vdsAlert({msg:'模拟故障完成', time:1});
+            }else{
+                $('body').vdsAlert({msg:res.msg, time:2});
+            }
+        },
+        error: function(){$.vdsMasker(false);$('#waiting').hide();$('body').vdsAlert({msg:'处理请求时发生错误'});}
+    });
+}
+
+function stop_simulate(){
+    $.ajax({
+        type: 'post',
+        dataType: 'json',
+        url: "<{url m=$MOD c='simulate' a='stop'}>",
+        beforeSend: function(){$.vdsMasker(true);$('#waiting').vdsMidst({gotop: -200}).show();},
+        success: function(res){
+            $.vdsMasker(false);
+            $('#waiting').hide();
+            if(res.status == 'success'){
+                $('body').vdsAlert({msg:'清除故障完成', time:1});
+            }else{
+                $('body').vdsAlert({msg:res.msg, time:2});
+            }
+        },
+        error: function(){$.vdsMasker(false);$('#waiting').hide();$('body').vdsAlert({msg:'处理请求时发生错误'});}
+    });
+}
+
+</script>
+</head>
+<body>
+<div class="content">
+  <div class="loc"><h2><i class="icon"></i>模拟服务故障</h2></div>
+  <div class="box">
+    <div class="bw-row pad10 cut">
+      <h3 class="c888">使用说明:</h3>
+      <div class="mt8 c888">
+        <p>模拟积分服务和消息通知服务故障</p>
+      </div>
+    </div>
+    <div class="module mt5 cut">
+      <div class="bw-row mt5 pad10 ta-c"><button type="button" class="cbtn btn" onclick="startSimulate()">故障模拟</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+  <div class="loc"><h2><i class="icon"></i>模拟服务故障清除</h2></div>
+  <div class="box">
+    <div class="bw-row pad10 cut">
+      <h3 class="c888">使用说明:</h3>
+      <div class="mt8 c888">
+        <p>模拟清除服务故障，积分服务和消息通知服务重新可用</p>
+      </div>
+    </div>
+    <div class="module mt5 cut">
+      <div class="bw-row mt5 pad10 ta-c"><button type="button" class="cbtn btn" onclick="stop_simulate()">故障清除</button></div>
+    </div>
+  </div>
+</div>
+<!-- waiting start -->
+<div class="waiting ta-c cut hide" id="waiting">
+  <h3 class="c666 f14">正在处理...</h3>
+  <div class="loading"></div>
+</div>
+<!-- waiting end -->
+</body>
+</html>
