@@ -95,7 +95,7 @@ class order_controller extends general_controller
 
 //        $res = $this -> http_op($data, $conf_file);
 //        $res = $this -> mq_op($data, $conf_file);
-		$res = $this -> mq_op_asyn($data, $conf_file);
+		$res = $this -> score_op($data, $conf_file);
 		return $res;
     }
 
@@ -153,26 +153,30 @@ class order_controller extends general_controller
 		return true;
     }
 	
-	public function mq_op_asyn($data, $conf_file)
+	public function score_op($data, $conf_file)
 	{
-		$asyn_mq_url = $this->get_config($conf_file, "asyn_mq_url");
+		$score_op_url = $this->get_config($conf_file, "score_op_url");
 		$header = array
         (
             "Content-Type:application/json"
         );
 		$content = $this -> reform_data($data);
 		
-        $curl_asyn = curl_init();
-        curl_setopt($curl_asyn, CURLOPT_URL, $asyn_mq_url);
-        curl_setopt($curl_asyn, CURLOPT_HTTPHEADER, $header);
-        curl_setopt($curl_asyn, CURLOPT_HEADER, true);
-        curl_setopt($curl_asyn, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl_asyn, CURLOPT_POST, 1);
-        curl_setopt($curl_asyn, CURLOPT_POSTFIELDS, $content);
+        $curl_op = curl_init();
+        curl_setopt($curl_op, CURLOPT_URL, $score_op_url);
+        curl_setopt($curl_op, CURLOPT_HTTPHEADER, $header);
+        curl_setopt($curl_op, CURLOPT_HEADER, true);
+        curl_setopt($curl_op, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl_op, CURLOPT_POST, 1);
+        curl_setopt($curl_op, CURLOPT_POSTFIELDS, $content);
 
-        $res_asyn = curl_exec($curl_asyn);
-        curl_close($curl_asyn);
-		
+        $res_op = curl_exec($curl_op);
+		$code = curl_getinfo($curl_op, CURLINFO_HTTP_CODE);
+        curl_close($curl_op);
+		if($code > 300)
+		{
+			return false;
+		}
 		return true;
 	}
 

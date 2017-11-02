@@ -13,8 +13,8 @@ class mq_config_controller extends general_controller
 		(
 			'project_id' => request('project_id', ''),
             'queue_id' => request('queue_id', ''),
-			'username' => request('username', ''),
-            'password' => request('password', '')
+//			'username' => request('username', ''),
+//            'password' => request('password', '')
 		);
 		
         $module_conf = array
