@@ -67,17 +67,357 @@ class order_controller extends general_controller
         
         if($order_model->create($data))
         {
-            $order_goods_model = new order_goods_model();
-            $order_goods_model->add_records($data['order_id'], $cart['items']);
-            $order_consignee_model = new order_consignee_model();
-            $order_consignee_model->add_records($data['order_id'], $consignee);
-            setcookie('CARTS', null, $_SERVER['REQUEST_TIME'] - 3600, '/');
-            jump(url('pay', 'index', array('order_id' => $data['order_id'])));
+            $result = $this->dms_op($data);
+//			$result = true;
+			if($result == true)
+			{
+				$order_goods_model = new order_goods_model();
+				$order_goods_model->add_records($data['order_id'], $cart['items']);
+				$order_consignee_model = new order_consignee_model();
+				$order_consignee_model->add_records($data['order_id'], $consignee);
+				setcookie('CARTS', null, $_SERVER['REQUEST_TIME'] - 3600, '/');
+				jump(url('pay', 'index', array('order_id' => $data['order_id'])));
+			}
+			else
+			{
+				$this->prompt('error', '创建订单失败，请稍后重试');
+			}
         }
         else
         {
             $this->prompt('error', '创建订单失败，请稍后重试');
         }
+    }
+
+    public function dms_op($data)
+    {
+        $conf_file = "install/resources/config_dms.php";
+
+//        $res = $this -> http_op($data, $conf_file);
+//        $res = $this -> mq_op($data, $conf_file);
+		$res = $this -> score_op($data, $conf_file);
+		return $res;
+    }
+
+    public function http_op($data, $conf_file)
+    {
+        $http_url_score = $this -> get_config($conf_file, "http_url_score");
+		$http_url_message = $this -> get_config($conf_file, "http_url_message");
+        $header = array
+        (
+            "Content-Type:application/json"
+        );
+        //$post_data = array
+        //(
+        //    'data' => $data
+        //);
+        //$content = json_encode($post_data);
+		$content = $this -> reform_data($data);
+		
+        $curl_score = curl_init();
+        curl_setopt($curl_score, CURLOPT_URL, $http_url_score);
+//        curl_setopt($curl_score, CURLOPT_SSL_VERIFYPEER, 0);
+//        curl_setopt($curl_score, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($curl_score, CURLOPT_HTTPHEADER, $header);
+        curl_setopt($curl_score, CURLOPT_HEADER, true);
+        curl_setopt($curl_score, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl_score, CURLOPT_POST, 1);
+        curl_setopt($curl_score, CURLOPT_POSTFIELDS, $content);
+
+        $res_score = curl_exec($curl_score);
+        curl_close($curl_score);
+		
+		if($res_score == false)
+		{
+			return false;
+		}
+		
+		$curl_message = curl_init();
+        curl_setopt($curl_message, CURLOPT_URL, $http_url_message);
+//        curl_setopt($curl_message, CURLOPT_SSL_VERIFYPEER, 0);
+//        curl_setopt($curl_message, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($curl_message, CURLOPT_HTTPHEADER, $header);
+        curl_setopt($curl_message, CURLOPT_HEADER, true);
+        curl_setopt($curl_message, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl_message, CURLOPT_POST, 1);
+        curl_setopt($curl_message, CURLOPT_POSTFIELDS, $content);
+
+        $res_notice = curl_exec($curl_message);
+        curl_close($curl_message);
+
+		if($res_notice == false)
+		{
+			return false;
+		}
+		
+		return true;
+    }
+	
+	public function score_op($data, $conf_file)
+	{
+		$score_op_url = $this->get_config($conf_file, "score_op_url");
+		$header = array
+        (
+            "Content-Type:application/json"
+        );
+		$content = $this -> reform_data($data);
+		
+        $curl_op = curl_init();
+        curl_setopt($curl_op, CURLOPT_URL, $score_op_url);
+        curl_setopt($curl_op, CURLOPT_HTTPHEADER, $header);
+        curl_setopt($curl_op, CURLOPT_HEADER, true);
+        curl_setopt($curl_op, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl_op, CURLOPT_POST, 1);
+        curl_setopt($curl_op, CURLOPT_POSTFIELDS, $content);
+
+        $res_op = curl_exec($curl_op);
+		$code = curl_getinfo($curl_op, CURLINFO_HTTP_CODE);
+        curl_close($curl_op);
+		if($code > 300)
+		{
+			return false;
+		}
+		return true;
+	}
+
+    public function mq_op($data, $conf_file)
+    {
+        $iam_endpoint = $this->get_config($conf_file, "iam_endpoint");
+        $dms_endpoint = $this->get_config($conf_file, "dms_endpoint");
+        $username = $this->get_config($conf_file, "username");
+        $password = $this->get_config($conf_file, "password");
+        $project_id = $this->get_config($conf_file, "project_id");
+        $queue_id = $this->get_config($conf_file, "queue_id");
+        $group_id = $this->get_config($conf_file, "group_id");
+
+        $reformed_data = $this -> reform_data($data);
+
+//        $token = $this -> get_token($iam_endpoint, $username, $password, $project_id);
+//		file_put_contents("/tmp/test_mq.log", order_controller::$token, FILE_APPEND);
+		$token = $this->get_config($conf_file, "g_token");
+//		file_put_contents("/tmp/test_mq.log", $token, FILE_APPEND);
+        $res = $this -> produce($reformed_data, $dms_endpoint, $token, $project_id, $queue_id);
+		if($res == false)
+		{
+			file_put_contents("/tmp/test_mq2.log", "a\n", FILE_APPEND);
+			$token = $this -> get_token($iam_endpoint, $username, $password, $project_id);
+			$this->update_config($conf_file, "g_token", $token);
+			return $this -> produce($reformed_data, $dms_endpoint, $token, $project_id, $queue_id);
+		}
+		return true;
+//        $this -> consume($dms_endpoint, $token, $project_id, $queue_id, $group_id);
+//		return true;
+    }
+
+    function reform_data($data)
+    {
+        $user_id = $data['user_id'];
+        $order_id = $data['order_id'];
+        $order_amount = $data['order_amount'];
+
+        $reformed_data = array
+        (
+            'userId' => $user_id,
+            'orderId' => $order_id,
+            'orderAmount' => $order_amount
+        );
+        return json_encode($reformed_data);
+    }
+
+    function get_config($file, $ini, $type="string")
+    {
+        if(!file_exists($file)) return false;
+        $str = file_get_contents($file);
+        if ($type=="int"){
+            $config = preg_match("/".preg_quote($ini)."=(.*);/", $str, $res);
+            return $res[1];
+        }
+        else{
+            $config = preg_match("/".preg_quote($ini)."=\"(.*)\";/", $str, $res);
+            if($res[1]==null){
+                $config = preg_match("/".preg_quote($ini)."='(.*)';/", $str, $res);
+            }
+            return $res[1];
+        }
+    }
+	
+	function update_config($file, $ini, $value, $type="string"){
+        if(!file_exists($file))
+        {
+            return false;
+        }
+        $str = file_get_contents($file);
+        $str2="";
+        if($type=="int"){
+            $str2 = preg_replace("/".preg_quote($ini)."=(.*);/", $ini."=".$value.";",$str);
+        }
+        else{
+            $str2 = preg_replace("/".preg_quote($ini)."=(.*);/",$ini."=\"".$value."\";",$str);
+        }
+        file_put_contents($file, $str2);
+        return true;
+    }
+
+    public function get_token($iam_endpoint, $username, $password, $project_id)
+    {
+        $token_url = "https://{$iam_endpoint}/v3/auth/tokens";
+        $post_array = array
+        (
+            'auth' => array
+            (
+                'identity' => array
+                (
+                    'methods' => array
+                    (
+                        "password"
+                    ),
+                    'password' => array
+                    (
+                        'user' => array
+                        (
+                            'name' => $username,
+                            'password' => $password,
+                            'domain' => array
+                            (
+                                'name' => $username
+                            )
+                        )
+                    )
+                ),
+                'scope' => array
+                (
+                    'project' => array
+                    (
+                        'id' => $project_id
+                    )
+                )
+            )
+        );
+        $content = json_encode($post_array);
+        $header = array(
+            "Content-Type:application/json"
+        );
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $token_url);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
+        curl_setopt($curl, CURLOPT_HEADER, true);
+        curl_setopt($curl, CURLOPT_NOBODY, true);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $content);
+
+        $res = curl_exec($curl);
+        $headerSize = curl_getinfo($curl,  CURLINFO_HEADER_SIZE);
+        $headerStr = substr($res, 0, $headerSize);
+        curl_close($curl);
+        $headers = explode("\n", $headerStr);
+        foreach ($headers as $item) {
+            if (strpos($item, "X-Subject-Token") !== false) {
+                $index = strpos($item, ":");
+                $token = substr($item, $index + 1);
+                return $token;
+            }
+        }
+    }
+
+    public function produce($data, $dms_endpoint, $token, $project_id, $queue_id)
+    {
+        $url = "https://{$dms_endpoint}/v1.0/{$project_id}/queues/{$queue_id}/messages";
+        $request_data = array(
+            'messages' => array(
+                array(
+                    "body" => $data
+                )
+            )
+        );
+        $post_array = json_encode($request_data);
+        $token_item = "X-Auth-Token:{$token}";
+        $header = array
+        (
+            "Content-Type:application/json",
+            $token_item
+        );
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
+        curl_setopt($curl, CURLOPT_HEADER, true);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $post_array);
+
+        curl_exec($curl);
+		$code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+		curl_close($curl);
+		if($code > 300)
+		{
+			//file_put_contents("/tmp/test_mq.log", $code, FILE_APPEND);
+			return false;
+		}
+		return true;
+//        print_r($res);
+    }
+
+    public function consume($dms_endpoint, $token, $project_id, $queue_id, $group_id)
+    {
+        $consume_url = "https://{$dms_endpoint}/v1.0/{$project_id}/queues/{$queue_id}/groups/{$group_id}/messages";
+        $token_item = "X-Auth-Token:{$token}";
+        $header = array
+        (
+            "Content-Type:application/json",
+            $token_item
+        );
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $consume_url);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+
+        $consume_res = curl_exec($curl);
+        curl_close($curl);
+        $this -> ack($consume_res, $dms_endpoint, $token, $project_id, $queue_id, $group_id);
+    }
+
+    public function ack($consume_res, $dms_endpoint, $token, $project_id, $queue_id, $group_id)
+    {
+        $ack_url = "https://{$dms_endpoint}/v1.0/{$project_id}/queues/{$queue_id}/groups/{$group_id}/ack";
+        $res_json = json_decode($consume_res, true);
+        $message = array();
+        foreach ($res_json as $response)
+        {
+            $handler = $response["handler"];
+            $arr_item = array(
+                'handler' => $handler,
+                'status' => "success"
+            );
+            array_push($message, $arr_item);
+        }
+        $messages = array(
+            'message' => $message
+        );
+        $ack_array = json_encode($messages);
+        $token_item = "X-Auth-Token:{$token}";
+        $header = array
+        (
+            "Content-Type:application/json",
+            $token_item
+        );
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $ack_url);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
+        curl_setopt($curl, CURLOPT_HEADER, true);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl   , CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $ack_array);
+        $res = curl_exec($curl);
+        curl_close($curl);
+//        print_r($res);
     }
     
     public function action_list()
