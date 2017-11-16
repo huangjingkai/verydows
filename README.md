@@ -47,13 +47,10 @@
 
 * 官网地址：http://www.verydows.com 
 
-* 演示地址：http://demo.verydows.com
+* 演示地址：http://mall.huangjingkai.cn
 
 
 #### 联系我们
 
-* 邮箱：besten#live.com (将“#”换成"@")
+* 邮箱：huangjingkai#foxmail.com (将“#”换成"@")
 
-* QQ：150526401
-
-* QQ讨论交流群：372701906

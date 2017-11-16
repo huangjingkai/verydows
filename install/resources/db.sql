@@ -616,11 +616,11 @@ CREATE TABLE `#tablepre#setting` (
 -- ----------------------------
 -- Records of setting
 -- ----------------------------
-INSERT INTO `#tablepre#setting` VALUES ('site_name', 'Verydows 开源电商系统');
-INSERT INTO `#tablepre#setting` VALUES ('home_title', 'Verydows 开源电子商务系统 | 轻松开启电商之旅');
+INSERT INTO `#tablepre#setting` VALUES ('site_name', '黄靖凯的开源电商系统');
+INSERT INTO `#tablepre#setting` VALUES ('home_title', '黄靖凯的开源电子商务系统 | 轻松开启电商之旅');
 INSERT INTO `#tablepre#setting` VALUES ('home_keywords', '');
 INSERT INTO `#tablepre#setting` VALUES ('home_description', '');
-INSERT INTO `#tablepre#setting` VALUES ('footer_info', '<div class=\"copyright mt10\"><p>联系邮箱：service@verydows.com<span class=\"sep\">|</span>QQ交流群：372701906<span class=\"sep\">|</span>Copyright © 2016 Verydows.com 版权所有</p></div>');
+INSERT INTO `#tablepre#setting` VALUES ('footer_info', '<div class=\"copyright mt10\"><p>联系邮箱：huangjingkai@foxmail.com<span class=\"sep\">|</span>欢迎加入微信交流群<span class=\"sep\">|</span>Copyright © 2016 Verydows 版权所有</p></div>');
 INSERT INTO `#tablepre#setting` VALUES ('goods_search_per_num', '20');
 INSERT INTO `#tablepre#setting` VALUES ('upload_filetype', '.jpg|.jpeg|.gif|.png|.bmp|.swf|.flv|.avi|.rmvb');
 INSERT INTO `#tablepre#setting` VALUES ('upload_filesize', '2MB');
