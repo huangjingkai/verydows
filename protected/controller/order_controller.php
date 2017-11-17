@@ -69,19 +69,19 @@ class order_controller extends general_controller
         {
             $result = $this->dms_op($data);
 //			$result = true;
-			if($result == true)
-			{
+//			if($result == true)
+//			{
 				$order_goods_model = new order_goods_model();
 				$order_goods_model->add_records($data['order_id'], $cart['items']);
 				$order_consignee_model = new order_consignee_model();
 				$order_consignee_model->add_records($data['order_id'], $consignee);
 				setcookie('CARTS', null, $_SERVER['REQUEST_TIME'] - 3600, '/');
 				jump(url('pay', 'index', array('order_id' => $data['order_id'])));
-			}
-			else
-			{
-				$this->prompt('error', '创建订单失败，请稍后重试');
-			}
+//			}
+//			else
+//			{
+//				$this->prompt('error', '创建订单失败，请稍后重试');
+//			}
         }
         else
         {
