@@ -1,7 +1,7 @@
 <?php 
 return array (
-  'site_name' => '黄靖凯的开源电商系统',
-  'home_title' => '黄靖凯的开源电子商务系统 | 轻松开启电商之旅',
+  'site_name' => 'PaaS云中间件的开源电商系统',
+  'home_title' => 'PaaS云中间件的开源电子商务系统 | 轻松开启电商之旅',
   'home_keywords' => '',
   'home_description' => '',
   'footer_info' => '<div class="copyright mt10"><p>联系邮箱：huangjingkai@foxmail.com<span class="sep">|</span>欢迎加入微信群交流<span class="sep">|</span>Copyright © 2016 Verydows 版权所有</p></div>',

@@ -616,8 +616,8 @@ CREATE TABLE `#tablepre#setting` (
 -- ----------------------------
 -- Records of setting
 -- ----------------------------
-INSERT INTO `#tablepre#setting` VALUES ('site_name', '黄靖凯的开源电商系统');
-INSERT INTO `#tablepre#setting` VALUES ('home_title', '黄靖凯的开源电子商务系统 | 轻松开启电商之旅');
+INSERT INTO `#tablepre#setting` VALUES ('site_name', 'PaaS云中间件的开源电商系统');
+INSERT INTO `#tablepre#setting` VALUES ('home_title', 'PaaS云中间件的开源电子商务系统 | 轻松开启电商之旅');
 INSERT INTO `#tablepre#setting` VALUES ('home_keywords', '');
 INSERT INTO `#tablepre#setting` VALUES ('home_description', '');
 INSERT INTO `#tablepre#setting` VALUES ('footer_info', '<div class=\"copyright mt10\"><p>联系邮箱：huangjingkai@foxmail.com<span class=\"sep\">|</span>欢迎加入微信交流群<span class=\"sep\">|</span>Copyright © 2016 Verydows 版权所有</p></div>');
